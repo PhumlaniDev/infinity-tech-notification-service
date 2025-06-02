@@ -80,7 +80,7 @@ jobs:
           cp .github/settings.xml ~/.m2/settings.xml
 
       - name: Build with Maven
-        run: mvn --batch-mode clean install -DskipTests -Dspring.profiles.active=develop --settings .github/settings.xml
+        run: mvn --batch-mode clean install -DskipTests -Dspring.profiles.active=dev--settings .github/settings.xml
         env:
           GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/authdb
