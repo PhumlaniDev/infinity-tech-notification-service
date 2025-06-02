@@ -1,4 +1,4 @@
-CREATE TABLE notification_log (
+CREATE TABLE IF NOT EXISTS notification_log (
   id SERIAL PRIMARY KEY,
   user_id VARCHAR(255),
   type VARCHAR(50),

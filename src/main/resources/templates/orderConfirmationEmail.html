@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f6f6f6; padding: 20px;">
+<table min-height="100%" style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px;">
+    <tr>
+        <td style="text-align: center;">
+            <h2 style="color: #2c3e50;">Thank You for Your Order!</h2>
+            <p>Your order has been placed successfully.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p><strong>Order ID:</strong> <span th:text="${orderId}"></span></p>
+            <p><strong>Order Total:</strong> R<span th:text="${totalAmount}"></span></p>
+            <p><strong>Order Date:</strong> <span th:text="${orderDate}"></span></p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h3 style="color: #34495e;">Order Items</h3>
+            <table min-height="100%" style="border-collapse: collapse;">
+                <thead>
+                <tr style="background-color: #f0f0f0;">
+                    <th text-align="left">Product</th>
+                    <th text-align="right">Qty</th>
+                    <th text-align="right">Price</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${items}">
+                    <td th:text="${item.productDetails.name}">Sample Product</td>
+                    <td text-align="right" th:text="${item.quantity}">1</td>
+                    <td text-align="right">$<span th:text="${item.productDetails.price}">99.99</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-top: 20px;">
+            <p>If you have any questions, contact us at <a href="mailto:support@yourcompany.com">support@yourcompany.com</a></p>
+            <p style="color: #999; font-size: 12px;">© 2025 YourCompany. All rights reserved.</p>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

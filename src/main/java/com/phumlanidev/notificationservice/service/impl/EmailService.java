@@ -1,5 +1,6 @@
 package com.phumlanidev.notificationservice.service.impl;
 
+import com.phumlanidev.notificationservice.dto.CartDto;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,9 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,11 +22,21 @@ public class EmailService {
 
   private final JavaMailSender emailSender;
   private final TemplateEngine templateEngine;
+  private final CartServiceImpl cartService;
+  private final List<CartDto> items = new ArrayList<>();
 
   public void sendOrderConfirmationEmail(String to, Long orderId, BigDecimal totalAmount) {
     Context context = new Context();
     context.setVariable("orderId", orderId);
     context.setVariable("totalAmount", totalAmount);
+
+    CartDto cartDto = cartService.getCart();
+    items.clear();
+    items.add(cartDto);
+    context.setVariable("items", items);
+
+    Instant orderDate = Instant.now();
+    context.setVariable("orderDate", orderDate);
 
     String htmlBody = templateEngine.process("orderConfirmationEmail", context);
 

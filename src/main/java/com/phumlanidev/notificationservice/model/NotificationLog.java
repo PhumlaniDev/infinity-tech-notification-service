@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 @Entity
-@Table(name = "notification_log")
 @Data
 @Builder
 @NoArgsConstructor

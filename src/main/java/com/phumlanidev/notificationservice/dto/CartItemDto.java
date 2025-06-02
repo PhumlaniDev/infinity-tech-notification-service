@@ -12,4 +12,5 @@ public class CartItemDto {
     private String productName;
     private Integer quantity;
     private BigDecimal rice;
+    private ProductDto productDetails;
 }
