@@ -2,6 +2,7 @@ package com.phumlanidev.notificationservice.controller;
 
 import com.phumlanidev.notificationservice.dto.OrderNotificationDto;
 import com.phumlanidev.notificationservice.service.impl.NotificationServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,7 @@ public class NotificationController {
   private final NotificationServiceImpl notificationService;
 
   @PostMapping("/email")
-  public ResponseEntity<Void> sendPasswordResetNotification(@RequestBody OrderNotificationDto dto) {
+  public ResponseEntity<Void> sendPasswordResetNotification(@Valid @RequestBody OrderNotificationDto dto) {
     notificationService.sendOrderNotification(dto);
     return ResponseEntity.ok().build();
   }
