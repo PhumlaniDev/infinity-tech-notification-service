@@ -18,7 +18,7 @@ public class NotificationController {
   private final NotificationServiceImpl notificationService;
 
   @PostMapping("/email")
-  public ResponseEntity<Void> sendPasswordResetNotification(@Valid @RequestBody OrderNotificationDto dto) {
+  public ResponseEntity<Void> sendOrderNotification(@Valid @RequestBody OrderNotificationDto dto) {
     notificationService.sendOrderNotification(dto);
     return ResponseEntity.ok().build();
   }

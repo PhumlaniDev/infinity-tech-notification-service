@@ -12,8 +12,6 @@ import org.thymeleaf.context.Context;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +21,6 @@ public class EmailService {
   private final JavaMailSender emailSender;
   private final TemplateEngine templateEngine;
   private final CartServiceImpl cartService;
-  private final List<CartDto> items = new ArrayList<>();
 
   public void sendOrderConfirmationEmail(String to, Long orderId, BigDecimal totalAmount) {
     Context context = new Context();
@@ -31,9 +28,8 @@ public class EmailService {
     context.setVariable("totalAmount", totalAmount);
 
     CartDto cartDto = cartService.getCart();
-    items.clear();
-    items.add(cartDto);
-    context.setVariable("items", items);
+    log.debug("Cart details: {}", cartDto);
+    context.setVariable("items", cartDto.getCartItems());
 
     Instant orderDate = Instant.now();
     context.setVariable("orderDate", orderDate);

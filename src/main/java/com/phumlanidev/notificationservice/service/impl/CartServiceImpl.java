@@ -5,6 +5,7 @@ import com.phumlanidev.notificationservice.dto.CartItemDto;
 import com.phumlanidev.notificationservice.dto.ProductDto;
 import com.phumlanidev.notificationservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CartServiceImpl {
 
   private final RestTemplate restTemplate;
@@ -40,6 +42,12 @@ public class CartServiceImpl {
 
     if (cart !=null && cart.getCartItems() != null) {
       for (CartItemDto item: cart.getCartItems()) {
+        if (item.getProductDetails() == null) {
+          ProductDto fallback = new ProductDto();
+          fallback.setName(item.getProductName());
+          fallback.setPrice(item.getPrice());
+          item.setProductDetails(fallback);
+        }
         ProductDto productDetails = productService.getProductDetail(item.getProductId());
         item.setProductDetails(productDetails);
       }

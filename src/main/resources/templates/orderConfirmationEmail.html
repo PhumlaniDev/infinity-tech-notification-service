@@ -32,9 +32,9 @@
                 </thead>
                 <tbody>
                 <tr th:each="item : ${items}">
-                    <td th:text="${item.productDetails.name}">Sample Product</td>
+                    <td th:text="${item.productDetails?.name}">Sample Product</td>
                     <td text-align="right" th:text="${item.quantity}">1</td>
-                    <td text-align="right">$<span th:text="${item.productDetails.price}">99.99</span></td>
+                    <td text-align="right">$<span th:text="${item.productDetails?.price}">99.99</span></td>
                 </tr>
                 </tbody>
             </table>
