@@ -16,6 +16,8 @@ public class OrderNotificationDto {
   private String userId;
   @NotNull(message = "Order ID is required")
   private Long orderId;
+  @NotNull(message = "Email recipient is required")
+  private String toEmail;
   @NotNull(message = "Total amount is required")
   private BigDecimal total;
   @NotNull(message = "Timestamp is required")

@@ -1,17 +1,13 @@
 package com.phumlanidev.notificationservice.service.impl;
 
-import com.phumlanidev.notificationservice.dto.AccountVerificationDto;
-import com.phumlanidev.notificationservice.dto.CartReminderDto;
-import com.phumlanidev.notificationservice.dto.EmailNotificationDto;
-import com.phumlanidev.notificationservice.dto.OrderNotificationDto;
-import com.phumlanidev.notificationservice.dto.OrderStatusDto;
-import com.phumlanidev.notificationservice.dto.PasswordResetDto;
-import com.phumlanidev.notificationservice.dto.RefundNotificationDto;
+import com.phumlanidev.notificationservice.config.JwtAuthenticationConverter;
+import com.phumlanidev.notificationservice.dto.*;
 import com.phumlanidev.notificationservice.model.NotificationLog;
 import com.phumlanidev.notificationservice.repository.NotificationLogRepository;
 import com.phumlanidev.notificationservice.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -23,12 +19,13 @@ public class NotificationServiceImpl implements NotificationService {
 
   private final EmailService emailService;
   private final NotificationLogRepository notificationLogRepository;
+  private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
 
   @Override
   public void sendOrderNotification(OrderNotificationDto dto) {
     log.info("Sending order notification for order ID: {}", dto.getOrderId());
-    emailService.sendOrderConfirmationEmail("arendsephumlani@gmail.com", dto.getOrderId(), dto.getTotal());
+    emailService.sendOrderConfirmationEmail(dto.getToEmail(), dto.getOrderId(), dto.getTotal());
 
     notificationLogRepository.save(
             NotificationLog.builder()
@@ -41,16 +38,6 @@ public class NotificationServiceImpl implements NotificationService {
                     .build()
     );
     log.info("Order notification sent successfully for order ID: {}", dto.getOrderId());
-  }
-
-  @Override
-  public void sendPasswordResetNotification(PasswordResetDto dto) {
-
-  }
-
-  @Override
-  public void sendAccountVerificationNotification(AccountVerificationDto dto) {
-
   }
 
   @Override
@@ -81,5 +68,31 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public void sendCartAbandonmentReminder(CartReminderDto dto) {
 
+  }
+
+  @Override
+  public void sendPaymentConfirmation(PaymentConfirmationRequestDto dto) {
+    log.info("Sending payment confirmation for order ID: {}", dto.getOrderId());
+    if (dto.getToEmail() == null || dto.getToEmail().isEmpty()) {
+      log.error("Email address is required for payment confirmation");
+      throw new IllegalArgumentException("Email address is required for payment confirmation");
+    }
+    emailService.sendPaymentConfirmationEmail(dto);
+
+    Jwt jwt = jwtAuthenticationConverter.getCurrentJwt();
+
+    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+
+    notificationLogRepository.save(
+            NotificationLog.builder()
+                    .userId(userId)
+                    .channel("PAYMENT_CONFIRMATION")
+                    .type("EMAIL")
+                    .status("SENT")
+                    .sentAt(Instant.parse(Instant.now().toString()))
+                    .content("Payment confirmation for order ID: " + dto.getOrderId())
+                    .build()
+    );
+    log.info("Payment confirmation sent successfully for order ID: {}", dto.getOrderId());
   }
 }

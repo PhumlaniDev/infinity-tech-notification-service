@@ -1,6 +1,7 @@
 package com.phumlanidev.notificationservice.controller;
 
 import com.phumlanidev.notificationservice.dto.OrderNotificationDto;
+import com.phumlanidev.notificationservice.dto.PaymentConfirmationRequestDto;
 import com.phumlanidev.notificationservice.service.impl.NotificationServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,4 +24,9 @@ public class NotificationController {
     return ResponseEntity.ok().build();
   }
 
+  @PostMapping("/payment-confirmation")
+  public ResponseEntity<Void> sendPaymentConfirmation(@Valid @RequestBody PaymentConfirmationRequestDto dto) {
+    notificationService.sendPaymentConfirmation(dto);
+    return ResponseEntity.ok().build();
+  }
 }

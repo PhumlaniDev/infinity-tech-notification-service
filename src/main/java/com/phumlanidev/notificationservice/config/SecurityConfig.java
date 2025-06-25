@@ -27,7 +27,7 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/actuator/**").permitAll()
-                    .requestMatchers("/api/v1/notifications/**").hasRole("admin")
+                    .requestMatchers("/api/v1/notifications/**").hasRole("notification-service-role")
                     .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+<h2 style="color: #2c7be5;">✅ Payment Confirmation</h2>
+<p>Hi there,</p>
+<p>We’ve received your payment for <strong>Order #<span th:text="${orderId}">0000</span></strong>.</p>
+
+<p><strong>Amount Paid:</strong> R<span th:text="${amount}">0.00</span></p>
+<p><strong>Date:</strong> <span th:text="${timestamp}">now</span></p>
+
+<p>Your order is now being processed. We’ll notify you once it ships.</p>
+
+<p>Thank you for shopping with us!</p>
+<br/>
+<p style="font-size: 0.9em; color: #777;">This is an automated confirmation. No need to reply.</p>
+</body>
+</html>
