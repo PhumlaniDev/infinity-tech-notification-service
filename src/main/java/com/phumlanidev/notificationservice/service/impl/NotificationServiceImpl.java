@@ -5,8 +5,11 @@ import com.phumlanidev.notificationservice.dto.*;
 import com.phumlanidev.notificationservice.model.NotificationLog;
 import com.phumlanidev.notificationservice.repository.NotificationLogRepository;
 import com.phumlanidev.notificationservice.service.NotificationService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,8 @@ public class NotificationServiceImpl implements NotificationService {
   private final EmailService emailService;
   private final NotificationLogRepository notificationLogRepository;
   private final JwtAuthenticationConverter jwtAuthenticationConverter;
+  private final HttpServletRequest request;
+  private final AuditLogServiceImpl auditLogService;
 
 
   @Override
@@ -37,6 +42,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .content("Order confirmation for order ID: " + dto.getOrderId())
                     .build()
     );
+    logAudit("ORDER_NOTIFICATION_SENT", "Order notification sent for order ID: " + dto.getOrderId());
     log.info("Order notification sent successfully for order ID: {}", dto.getOrderId());
   }
 
@@ -79,7 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
     emailService.sendPaymentConfirmationEmail(dto);
 
-    Jwt jwt = jwtAuthenticationConverter.getCurrentJwt();
+    Jwt jwt = jwtAuthenticationConverter.getJwt();
 
     String userId = jwtAuthenticationConverter.extractUserId(jwt);
 
@@ -93,6 +99,23 @@ public class NotificationServiceImpl implements NotificationService {
                     .content("Payment confirmation for order ID: " + dto.getOrderId())
                     .build()
     );
+    logAudit("PAYMENT_CONFIRMATION_SENT", "Payment confirmation sent for order ID: " + dto.getOrderId());
     log.info("Payment confirmation sent successfully for order ID: {}", dto.getOrderId());
+  }
+
+  private void logAudit(String action, String details) {
+    String clientIp = request.getRemoteAddr();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String username = auth != null ? auth.getName() : "anonymous";
+    Jwt jwt = jwtAuthenticationConverter.getJwt();
+    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+
+    auditLogService.log(
+            action,
+            userId,
+            username,
+            clientIp,
+            details
+    );
   }
 }
