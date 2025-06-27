@@ -41,8 +41,7 @@ public class AuditLogServiceImpl {
    * Comment: this is the placeholder for documentation.
    */
   public Page<AuditLogDto> getAuditLogs(String userId, String action, Pageable pageable) {
-    Specification<AuditLog> spec = Specification.where(
-                    AuditLogSpecifications.hasUserId(userId))
+    Specification<AuditLog> spec = AuditLogSpecifications.hasUserId(userId)
             .and(AuditLogSpecifications.hasAction(action));
 
     return auditLogRepository.findAll(spec, pageable).map(this::toDto);
