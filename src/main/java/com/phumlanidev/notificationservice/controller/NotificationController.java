@@ -1,6 +1,8 @@
 package com.phumlanidev.notificationservice.controller;
 
+import com.phumlanidev.notificationservice.dto.EmailVerificationRequestDto;
 import com.phumlanidev.notificationservice.dto.OrderNotificationDto;
+import com.phumlanidev.notificationservice.dto.PasswordResetDto;
 import com.phumlanidev.notificationservice.dto.PaymentConfirmationRequestDto;
 import com.phumlanidev.notificationservice.service.impl.NotificationServiceImpl;
 import jakarta.validation.Valid;
@@ -27,6 +29,18 @@ public class NotificationController {
   @PostMapping("/payment-confirmation")
   public ResponseEntity<Void> sendPaymentConfirmation(@Valid @RequestBody PaymentConfirmationRequestDto dto) {
     notificationService.sendPaymentConfirmation(dto);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/password-reset")
+  public ResponseEntity<Void> sendPasswordReset(@Valid @RequestBody PasswordResetDto dto) {
+    notificationService.sendPasswordResetNotification(dto);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/email-verification")
+  public ResponseEntity<Void> sendEmailVerification(@Valid @RequestBody EmailVerificationRequestDto dto) {
+    notificationService.sendEmailVerificationNotification(dto);
     return ResponseEntity.ok().build();
   }
 }

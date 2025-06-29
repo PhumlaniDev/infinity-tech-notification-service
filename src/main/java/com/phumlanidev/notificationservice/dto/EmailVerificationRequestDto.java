@@ -6,8 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class PasswordResetDto {
-
-  @NotBlank(message = "Email is required")
+public class EmailVerificationRequestDto {
+  @NotBlank
   private String email;
 }

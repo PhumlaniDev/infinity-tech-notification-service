@@ -103,6 +103,64 @@ public class NotificationServiceImpl implements NotificationService {
     log.info("Payment confirmation sent successfully for order ID: {}", dto.getOrderId());
   }
 
+  @Override
+  public void sendPasswordResetNotification(PasswordResetDto dto) {
+    log.info("Sending password reset notification to email: {}", dto.getEmail());
+    if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
+      log.error("Email address is required for password reset");
+      throw new IllegalArgumentException("Email address is required for password reset");
+    }
+    emailService.sendResetPasswordEmail(dto.getEmail());
+
+    Jwt jwt = jwtAuthenticationConverter.getJwt();
+    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+
+    notificationLogRepository.save(
+            NotificationLog.builder()
+                    .userId(userId)
+                    .channel("PASSWORD_RESET")
+                    .type("EMAIL")
+                    .status("SENT")
+                    .sentAt(Instant.now())
+                    .content("Password reset notification sent to " + dto.getEmail())
+                    .build()
+    );
+    logAudit("PASSWORD_RESET_SENT", "Password reset notification sent to " + dto.getEmail());
+    log.info("Password reset notification sent successfully to email: {}", dto.getEmail());
+
+  }
+
+  @Override
+  public void sendEmailVerificationNotification(EmailVerificationRequestDto dto) {
+    log.info("Sending email verification notification to: {}", dto.getEmail());
+    if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
+      log.error("Email address is required for email verification");
+      throw new IllegalArgumentException("Email address is required for email verification");
+    }
+    emailService.sendEmailVerificationNotification(dto.getEmail());
+
+    Jwt jwt = jwtAuthenticationConverter.getJwt();
+    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+
+    notificationLogRepository.save(
+            NotificationLog.builder()
+                    .userId(userId)
+                    .channel("EMAIL_VERIFICATION")
+                    .type("EMAIL")
+                    .status("SENT")
+                    .sentAt(Instant.now())
+                    .content("Email verification sent to " + dto.getEmail())
+                    .build()
+    );
+    logAudit("EMAIL_VERIFICATION_SENT", "Email verification sent to " + dto.getEmail());
+    log.info("Email verification sent successfully to: {}", dto.getEmail());
+  }
+
+  @Override
+  public void sendUserRegistrationNotification(UserRegistrationDto dto) {
+
+  }
+
   private void logAudit(String action, String details) {
     String clientIp = request.getRemoteAddr();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
