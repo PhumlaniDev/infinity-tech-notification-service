@@ -15,7 +15,8 @@ import java.time.Instant;
 public class PaymentConfirmationRequestDto {
 
   private String toEmail;
-  private String orderId;
+  private Long orderId;
   private BigDecimal totalAmount;
+  private String currency;
   private Instant timestamp;
 }

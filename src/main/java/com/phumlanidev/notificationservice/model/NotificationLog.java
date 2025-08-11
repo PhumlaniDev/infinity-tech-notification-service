@@ -31,4 +31,25 @@ public class NotificationLog {
   private Instant sentAt;
   private Instant failedAt;
   private String errorMessage;
+
+
+  public static NotificationLog success(String type, String email) {
+    return NotificationLog.builder()
+            .type(type)
+            .destination(email)
+            .status("SUCCESS")
+            .content("Email sent successfully")
+            .sentAt(Instant.now())
+            .build();
+  }
+
+  public static NotificationLog failure(String type, String email, String errorMessage) {
+    return NotificationLog.builder()
+            .type(type)
+            .destination(email)
+            .status("FAILED")
+            .content(errorMessage)
+            .sentAt(Instant.now())
+            .build();
+  }
 }

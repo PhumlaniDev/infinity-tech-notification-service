@@ -1,16 +1,15 @@
 package com.phumlanidev.notificationservice.service.impl;
 
-import com.phumlanidev.notificationservice.config.JwtAuthenticationConverter;
 import com.phumlanidev.notificationservice.dto.*;
 import com.phumlanidev.notificationservice.model.NotificationLog;
 import com.phumlanidev.notificationservice.repository.NotificationLogRepository;
 import com.phumlanidev.notificationservice.service.NotificationService;
+import com.phumlanidev.notificationservice.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -22,7 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
 
   private final EmailService emailService;
   private final NotificationLogRepository notificationLogRepository;
-  private final JwtAuthenticationConverter jwtAuthenticationConverter;
+  private final SecurityUtils securityUtils;
   private final HttpServletRequest request;
   private final AuditLogServiceImpl auditLogService;
 
@@ -84,10 +83,7 @@ public class NotificationServiceImpl implements NotificationService {
       throw new IllegalArgumentException("Email address is required for payment confirmation");
     }
     emailService.sendPaymentConfirmationEmail(dto);
-
-    Jwt jwt = jwtAuthenticationConverter.getJwt();
-
-    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+    String userId = securityUtils.getCurrentUserId();
 
     notificationLogRepository.save(
             NotificationLog.builder()
@@ -111,9 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
       throw new IllegalArgumentException("Email address is required for password reset");
     }
     emailService.sendResetPasswordEmail(dto.getEmail());
-
-    Jwt jwt = jwtAuthenticationConverter.getJwt();
-    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+    String userId = securityUtils.getCurrentUserId();
 
     notificationLogRepository.save(
             NotificationLog.builder()
@@ -138,9 +132,7 @@ public class NotificationServiceImpl implements NotificationService {
       throw new IllegalArgumentException("Email address is required for email verification");
     }
     emailService.sendEmailVerificationNotification(dto.getEmail());
-
-    Jwt jwt = jwtAuthenticationConverter.getJwt();
-    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+    String userId = securityUtils.getCurrentUserId();
 
     notificationLogRepository.save(
             NotificationLog.builder()
@@ -165,8 +157,7 @@ public class NotificationServiceImpl implements NotificationService {
     String clientIp = request.getRemoteAddr();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     String username = auth != null ? auth.getName() : "anonymous";
-    Jwt jwt = jwtAuthenticationConverter.getJwt();
-    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+    String userId = securityUtils.getCurrentUserId();
 
     auditLogService.log(
             action,
