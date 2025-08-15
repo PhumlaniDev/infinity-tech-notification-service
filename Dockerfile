@@ -16,7 +16,7 @@ FROM eclipse-temurin:21-jre-jammy
 RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser -s /bin/bash -m appuser
 
 WORKDIR /app
-COPY --from=builder /app/target/notification-service-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/notification-service-0.0.1-SNAPSHOT-exec.jar app.jar
 
 # Copy wait-for-it.sh into container
 COPY wait-for-it.sh wait-for-it.sh
