@@ -18,14 +18,9 @@ RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser -s /bin/bash -m appus
 WORKDIR /app
 COPY --from=builder /app/target/notification-service-0.0.1-SNAPSHOT-exec.jar app.jar
 
-# Copy wait-for-it.sh into container
-COPY wait-for-it.sh wait-for-it.sh
-RUN chmod +x wait-for-it.sh
-
 # Change file permissions and ownership (optional but good)
 RUN chown -R appuser:appuser /app
 
 USER appuser
 
-# Run wait-for-it before starting app
 ENTRYPOINT ["java", "-jar", "app.jar"]
