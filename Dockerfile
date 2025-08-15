@@ -28,4 +28,4 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Run wait-for-it before starting app
-ENTRYPOINT ["./wait-for-it.sh", "loki:3100", "--", "java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
