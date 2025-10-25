@@ -1,7 +1,8 @@
 package com.phumlanidev.notificationservice.config;
 
-import com.phumlanidev.commonevents.events.OrderPlacedEvent;
-import com.phumlanidev.commonevents.events.PaymentCompletedEvent;
+
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
+import com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,7 @@ public class KafkaConfig {
     config.put("spring.deserializer.value.delegate.class", JsonDeserializer.class);
     config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.phumlanidev.commonevents.events");
     config.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true);
-    config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.phumlanidev.commonevents.events.PaymentCompletedEvent");
+    config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent");
 //    config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
     return new DefaultKafkaConsumerFactory<>(config);
@@ -63,7 +64,7 @@ public class KafkaConfig {
     config.put("spring.deserializer.value.delegate.class", JsonDeserializer.class);
     config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.phumlanidev.commonevents.events");
     config.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true);
-    config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.phumlanidev.commonevents.events.OrderPlacedEvent");
+    config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.phumlanidev.commonevents.events.order.OrderPlacedEvent");
 //    config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
     return new DefaultKafkaConsumerFactory<>(config);

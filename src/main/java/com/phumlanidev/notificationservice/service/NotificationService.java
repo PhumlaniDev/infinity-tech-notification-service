@@ -1,7 +1,9 @@
 package com.phumlanidev.notificationservice.service;
 
-import com.phumlanidev.notificationservice.dto.*;
 
+import com.phumlanidev.commonevents.events.order.OrderNotificationDto;
+import com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent;
+import com.phumlanidev.notificationservice.dto.*;
 
 public interface NotificationService {
 
@@ -13,7 +15,7 @@ public interface NotificationService {
   //  void sendPromotionalNotification(String userId, String promotionDetails);
   void sendRefundProcessedNotification(RefundNotificationDto dto);
   void sendCartAbandonmentReminder(CartReminderDto dto);
-  void sendPaymentConfirmation(PaymentConfirmationRequestDto dto);
+  void sendPaymentConfirmation(PaymentCompletedEvent event);
   void sendPasswordResetNotification(PasswordResetDto dto);
   void sendEmailVerificationNotification(EmailVerificationRequestDto dto);
   void sendUserRegistrationNotification(UserRegistrationDto dto);

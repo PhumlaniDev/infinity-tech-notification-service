@@ -1,21 +1,18 @@
 package com.phumlanidev.notificationservice.config;
 
-import com.phumlanidev.notificationservice.utils.SecurityUtils;
-import feign.RequestInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
 public class AuthFeingConfig {
 
-  private final SecurityUtils securityUtils;
-
-  @Bean
-  public RequestInterceptor requestInterceptor() {
-    return requestTemplate -> {
-      requestTemplate.header("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpT2RUSnBISV9FcnNubXVXcGVoNVpYM1VKUkxpa2I0b2hMaXNWQ2tfa0hRIn0.eyJleHAiOjE3NTQ0NzE0NDEsImlhdCI6MTc1NDQzNTQ0MSwianRpIjoiM2NjNGYwNzMtNmQ0Ny00ZDQxLWFiNGQtZjE1ZmNjMmU0N2UxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9lY29tbWVyY2UiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMTY3OTJlODAtNjg5ZC00ZTQ0LWFjNjctN2ExOGIxNDZlYzkwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYXV0aC1zZXJ2aWNlIiwic2lkIjoiOTQxNGM2MDktZjJhOS00MDg1LTkwMzQtMGEyMWZhMGNlN2NkIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjUwMDAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtbWFjLWFwcHMiLCJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiUGh1bWxhbmkgQXJlbmRzZSIsInByZWZlcnJlZF91c2VybmFtZSI6InBodW1sYW5pIiwiZ2l2ZW5fbmFtZSI6IlBodW1sYW5pIiwiZmFtaWx5X25hbWUiOiJBcmVuZHNlIiwiZW1haWwiOiJhcGh1bWxhbmkuZGV2QGdtYWlsLmNvbSJ9.D7AhPsam7cXd5xzgRnQoP8Y3HwYA1MR7sfa9KgE0UKPpidW4jTpZ2YkPp0KJI7F1oMjGMxR7TKbBcZVnP2vymFzk4RVEA4Kba4Ityq1_klR3Psn9PjrvVz10fOBMjmLoqijE9d0oY2TkmYRl7z-pJ36GAbCelD9n_gMPXg26dk1ZCwbDFWnZLLNuuIgSvI-455cc9Lp26QXz0Q6bmbiRgokTRrUwiLcHC6T3R_ePFDH8WZxt8Hfv3fhFfFIae4UVZKBQFLMmKDkCydWHr2JlITNaC7ZmOfX7iPpmf7bJnTPECrXaUf-iJQ7NILpzmCuJobmEJOfJchYYJp9OjQQxNQ");
-    };
-  }
+//  private final SecurityUtils securityUtils;
+//
+//  @Bean
+//  public RequestInterceptor requestInterceptor() {
+//    return requestTemplate -> {
+//      requestTemplate.header("Authorization", securityUtils.getCurrentAuthorizationHeader());
+//    };
+//  }
 }

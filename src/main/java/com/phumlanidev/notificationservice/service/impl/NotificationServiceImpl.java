@@ -1,11 +1,15 @@
 package com.phumlanidev.notificationservice.service.impl;
 
+
+import com.phumlanidev.commonevents.events.order.OrderNotificationDto;
+import com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent;
 import com.phumlanidev.notificationservice.dto.*;
 import com.phumlanidev.notificationservice.model.NotificationLog;
 import com.phumlanidev.notificationservice.repository.NotificationLogRepository;
 import com.phumlanidev.notificationservice.service.NotificationService;
+import com.phumlanidev.notificationservice.service.email.EmailService;
+import com.phumlanidev.notificationservice.service.invoice.InvoiceGenerator;
 import com.phumlanidev.notificationservice.utils.SecurityUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -22,14 +26,14 @@ public class NotificationServiceImpl implements NotificationService {
   private final EmailService emailService;
   private final NotificationLogRepository notificationLogRepository;
   private final SecurityUtils securityUtils;
-  private final HttpServletRequest request;
+  private final InvoiceGenerator invoiceGenerator;
   private final AuditLogServiceImpl auditLogService;
 
 
   @Override
   public void sendOrderNotification(OrderNotificationDto dto) {
     log.info("Sending order notification for order ID: {}", dto.getOrderId());
-    emailService.sendOrderConfirmationEmail(dto.getToEmail(), dto.getOrderId(), dto.getTotal());
+    emailService.sendOrderConfirmationEmail(dto.getToEmail(), dto.getOrderId(), dto.getTotal(), dto.getItems());
 
     notificationLogRepository.save(
             NotificationLog.builder()
@@ -62,7 +66,6 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void sendOrderCancellationNotification(OrderStatusDto dto) {
-
   }
 
   @Override
@@ -76,27 +79,33 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public void sendPaymentConfirmation(PaymentConfirmationRequestDto dto) {
-    log.info("Sending payment confirmation for order ID: {}", dto.getOrderId());
-    if (dto.getToEmail() == null || dto.getToEmail().isEmpty()) {
+  public void sendPaymentConfirmation(PaymentCompletedEvent event) {
+    log.info("Sending payment confirmation for order ID: {}", event.getOrderId());
+    if (event.getToEmail() == null || event.getToEmail().isEmpty()) {
       log.error("Email address is required for payment confirmation");
       throw new IllegalArgumentException("Email address is required for payment confirmation");
     }
-    emailService.sendPaymentConfirmationEmail(dto);
-    String userId = securityUtils.getCurrentUserId();
 
-    notificationLogRepository.save(
-            NotificationLog.builder()
-                    .userId(userId)
-                    .channel("PAYMENT_CONFIRMATION")
-                    .type("EMAIL")
-                    .status("SENT")
-                    .sentAt(Instant.parse(Instant.now().toString()))
-                    .content("Payment confirmation for order ID: " + dto.getOrderId())
-                    .build()
-    );
-    logAudit("PAYMENT_CONFIRMATION_SENT", "Payment confirmation sent for order ID: " + dto.getOrderId());
-    log.info("Payment confirmation sent successfully for order ID: {}", dto.getOrderId());
+    try {
+      byte[] invoicePdf = invoiceGenerator.generateInvoice(event);
+      emailService.sendPaymentConfirmationEmail(event, invoicePdf);
+      notificationLogRepository.save(
+              NotificationLog.builder()
+                      .userId(event.getUserId())
+                      .channel("PAYMENT_CONFIRMATION")
+                      .type("EMAIL")
+                      .status("SENT")
+                      .sentAt(Instant.now())
+                      .content("Payment confirmation for order ID: " + event.getOrderId())
+                      .build()
+      );
+      logAudit("PAYMENT_CONFIRMATION_SENT", "Payment confirmation sent for order ID: " + event.getOrderId());
+      log.info("Payment confirmation sent successfully for order ID: {}", event.getOrderId());
+    } catch (Exception e) {
+      log.error("Failed to send payment confirmation for order ID {}: {}", event.getOrderId(), e.getMessage());
+      throw new RuntimeException("Failed to send payment confirmation", e);
+    }
+
   }
 
   @Override
@@ -154,16 +163,14 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   private void logAudit(String action, String details) {
-    String clientIp = request.getRemoteAddr();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
     String userId = securityUtils.getCurrentUserId();
 
     auditLogService.log(
             action,
             userId,
-            username,
-            clientIp,
+            "SYSTEM",
+            "N/A",
             details
     );
   }

@@ -1,7 +1,9 @@
-package com.phumlanidev.notificationservice.service.impl;
+package com.phumlanidev.notificationservice.service.email;
 
-import com.phumlanidev.notificationservice.dto.CartDto;
-import com.phumlanidev.notificationservice.dto.PaymentConfirmationRequestDto;
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
+import com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent;
+import com.phumlanidev.notificationservice.service.invoice.InvoiceGenerator;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -27,7 +30,7 @@ public class EmailService {
 
   private final JavaMailSender emailSender;
   private final TemplateEngine templateEngine;
-  private final CartServiceImpl cartService;
+  private final InvoiceGenerator invoiceGenerator;
 
   @Value("${keycloak.auth-server-url}")
   private String keycloakAuthServerUrl;
@@ -42,14 +45,13 @@ public class EmailService {
   private String keycloakAdminPassword;
 
 
-  public void sendOrderConfirmationEmail(String to, Long orderId, BigDecimal totalAmount) {
+  public void sendOrderConfirmationEmail(String to, Long orderId, BigDecimal totalAmount, List<OrderPlacedEvent.OrderItemDto> items) {
     Context context = new Context();
     context.setVariable("orderId", orderId);
     context.setVariable("totalAmount", totalAmount);
 
-    CartDto cartDto = cartService.getCart();
-    log.debug("Cart details: {}", cartDto);
-    context.setVariable("items", cartDto.getCartItems());
+    log.debug("Cart details: {}", items);
+    context.setVariable("items", items);
 
     Instant orderDate = Instant.now();
     context.setVariable("orderDate", orderDate);
@@ -125,29 +127,32 @@ public class EmailService {
     }
   }
 
-  public void sendPaymentConfirmationEmail(PaymentConfirmationRequestDto request) {
-    Context context = new Context();
-    context.setVariable("orderId", request.getOrderId());
-    context.setVariable("amount", request.getTotalAmount());
-    context.setVariable("timestamp", request.getTimestamp());
-
-    String html = templateEngine.process("paymentConfirmationEmail", context);
-
+  public void sendPaymentConfirmationEmail(PaymentCompletedEvent event, byte[] invoicePdf) {
     try {
       MimeMessage message = emailSender.createMimeMessage();
-      MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-      helper.setTo(request.getToEmail());
-      helper.setSubject("✅ Payment Confirmation for Order #" + request.getOrderId());
-      helper.setText(html, true);
-
+      MimeMessageHelper helper = getMimeMessageHelper(event, message);
+      helper.addAttachment("Invoice-" + event.getOrderId() + ".pdf", new ByteArrayResource(invoicePdf));
       emailSender.send(message);
-      log.info("✅ Sent payment confirmation to {}", request.getToEmail());
-
+      log.info("✅ Sent payment confirmation to {}", "aphumlani.dev@gmail.com");
     } catch (Exception e) {
       log.error("❌ Failed to send payment confirmation: {}", e.getMessage());
       throw new RuntimeException("Failed to send email", e);
     }
+  }
+
+  private static MimeMessageHelper getMimeMessageHelper(PaymentCompletedEvent event, MimeMessage message) throws MessagingException {
+    MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+    helper.setTo(event.getToEmail());
+    helper.setSubject("✅ Payment Confirmation for Order #" + event.getOrderId());
+    helper.setText("""
+            Dear Customer,
+            
+            Your payment of %s %s has been successfully received.
+            Please find attached your invoice.
+            
+            Thank you for shopping with us!""".formatted(event.getCurrency(), event.getTotalAmount()), true);
+    return helper;
   }
 
   private Keycloak createAdminClient() {

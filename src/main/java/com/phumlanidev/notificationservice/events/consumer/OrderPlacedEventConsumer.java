@@ -1,8 +1,8 @@
 package com.phumlanidev.notificationservice.events.consumer;
 
 
-import com.phumlanidev.commonevents.events.OrderPlacedEvent;
-import com.phumlanidev.notificationservice.dto.OrderNotificationDto;
+import com.phumlanidev.commonevents.events.order.OrderNotificationDto;
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
 import com.phumlanidev.notificationservice.service.impl.NotificationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,6 @@ public class OrderPlacedEventConsumer {
   private final NotificationServiceImpl notificationService;
 
   @Retryable(
-          maxAttempts = 3,
           backoff = @Backoff(delay = 1000, multiplier = 2),
           retryFor = {RecoverableDataAccessException.class},
           noRetryFor = {IllegalAccessException.class}
@@ -41,6 +40,7 @@ public class OrderPlacedEventConsumer {
               .userId(event.getUserId())
               .orderId(event.getOrderId())
               .total(event.getTotal())
+              .items(event.getItems())
               .toEmail(event.getToEmail())
               .build();
 

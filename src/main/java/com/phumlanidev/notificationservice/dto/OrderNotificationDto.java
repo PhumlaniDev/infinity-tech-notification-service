@@ -2,13 +2,18 @@ package com.phumlanidev.notificationservice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class OrderNotificationDto {
 
@@ -22,4 +27,5 @@ public class OrderNotificationDto {
   private BigDecimal total;
   @NotNull(message = "Timestamp is required")
   private Instant timestamp;
+  private List<OrderItemDto> items;
 }

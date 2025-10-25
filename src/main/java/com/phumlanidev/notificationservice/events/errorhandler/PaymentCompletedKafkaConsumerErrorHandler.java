@@ -1,6 +1,7 @@
 package com.phumlanidev.notificationservice.events.errorhandler;
 
-import com.phumlanidev.commonevents.events.OrderPlacedEvent;
+
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
 import com.phumlanidev.notificationservice.events.dlq.OrderPlacedEventDlqPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
