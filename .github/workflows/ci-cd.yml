@@ -36,6 +36,8 @@ jobs:
 
   sast:
     needs: build
+    permissions:
+      actions: read
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-sast.yml@main
     secrets: inherit
 
