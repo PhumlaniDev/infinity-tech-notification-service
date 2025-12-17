@@ -28,6 +28,9 @@ jobs:
 
   build:
     needs: checkstyle
+    permissions:
+      packages: write      # Required for pushing to ghcr.io
+      contents: read
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-build-test.yml@main
     secrets: inherit
 
