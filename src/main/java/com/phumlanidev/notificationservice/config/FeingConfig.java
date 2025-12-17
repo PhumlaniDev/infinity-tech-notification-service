@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class AuthFeingConfig {
+public class FeingConfig {
 
 //  private final SecurityUtils securityUtils;
 //

@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
 import com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent;
+import com.phumlanidev.commonevents.events.product.ProductDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -102,17 +103,23 @@ public class InvoiceGenerator {
       double total = 0.0;
       if (items != null && !items.isEmpty()) {
         for (OrderPlacedEvent.OrderItemDto item : items) {
-          String desc = item.getProductDetails().getName() != null ? item.getProductDetails().getName() : "Product " + item.getProductId();
+          ProductDto details = item.getProductDetails();
+          String productName = details != null ? details.getName() : "Unknown Product";
           int qty = item.getQuantity() != 0 ? item.getQuantity() : 0;
-          BigDecimal bigDecimalFromInt = BigDecimal.valueOf(qty);
-          BigDecimal price = item.getProductDetails().getPrice() != null ? item.getProductDetails().getPrice() : BigDecimal.valueOf(0.0);
-          BigDecimal subtotal = bigDecimalFromInt.multiply(price);
-          total += subtotal.doubleValue();
+          BigDecimal price = details != null ? details.getPrice() : BigDecimal.ZERO;
+          BigDecimal lineTotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
+          total += lineTotal.doubleValue();
 
-          addBodyCell(itemTable, desc, tableBodyFont);
+//          String desc = item.getProductDetails().getName() != null ? item.getProductDetails().getName() : "Product " + item.getProductId();
+//          int qty = item.getQuantity() != 0 ? item.getQuantity() : 0;
+//          BigDecimal bigDecimalFromInt = BigDecimal.valueOf(qty);
+////          BigDecimal price = item.getProductDetails().getPrice() != null ? item.getProductDetails().getPrice() : BigDecimal.valueOf(0.0);
+//          BigDecimal subtotal = bigDecimalFromInt.multiply(price);
+
+          addBodyCell(itemTable, productName, tableBodyFont);
           addBodyCell(itemTable, String.valueOf(qty) , tableBodyFont);
           addBodyCell(itemTable,String.format("%.2f %s", price, event.getCurrency()), tableBodyFont);
-          addBodyCell(itemTable,String.format("%.2f %s", subtotal, event.getCurrency()), tableBodyFont);
+          addBodyCell(itemTable,String.format("%.2f %s", total, event.getCurrency()), tableBodyFont);
         }
       } else {
         addBodyCell(itemTable, "No items found", tableBodyFont);
@@ -139,57 +146,6 @@ public class InvoiceGenerator {
       footer.setAlignment(Element.ALIGN_CENTER);
       footer.setSpacingBefore(20);
       document.add(footer);
-
-
-      // =======================================
-
-//      //company info
-//      Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-//      Paragraph companyInfo = new Paragraph("Infinity Tech\nsupportt@infinitytech.com\n+27 123 456 789", headerFont);
-//      companyInfo.setSpacingAfter(10);
-//      document.add(companyInfo);
-//
-//      //customer info
-//      Font sectionFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.DARK_GRAY);
-//      document.add(new Paragraph("Bill To:", sectionFont)); // Empty line
-//      document.add(new Paragraph(event.getToEmail()));
-//      document.add(new Paragraph("Order ID: " + event.getOrderId()));
-//      document.add(new Paragraph("Transaction ID: " + event.getTransactionId()));
-//      document.add(new Paragraph("Date: " + event.getTimestamp().atZone(ZoneId.systemDefault())
-//              .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-//      document.add(new Paragraph(" "));
-//
-//      //table
-//      PdfPTable table = new PdfPTable(3);
-//      table.setWidthPercentage(100);
-//      table.setWidths(new float[]{3, 2, 2});
-//
-//      addTableHeader(table, "Description");
-//      addTableHeader(table, "Quantity");
-//      addTableHeader(table, "Amount");
-//
-//      //example row
-//      addTableRow(table, "E-commerce Order #" + event.getOrderId(), "1", event.getTotalAmount() + " " + event.getCurrency());
-//      document.add(table);
-//
-//      document.add(new Paragraph(" "));
-//
-//      //total
-//      Font totalFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-//      Paragraph total = new Paragraph("Total: " + formatAmount(event.getTotalAmount(), event.getCurrency()), totalFont);
-//      total.setAlignment(Element.ALIGN_RIGHT);
-//      document.add(total);
-//
-//      document.add(new Paragraph(" "));
-//      document.add(new LineSeparator());
-//
-//      //footer
-//      Font footerFont = new Font(Font.FontFamily.HELVETICA, 10, Font.ITALIC, BaseColor.GRAY);
-//      Paragraph footer = new Paragraph(" Thank you for your purchase! For support, contact us at " +
-//              "supportt@infinitytech.com", footerFont);
-//      footer.setAlignment(Element.ALIGN_CENTER);
-//      footer.setSpacingBefore(20);
-//      document.add(footer);
 
       document.close();
       writer.close();
