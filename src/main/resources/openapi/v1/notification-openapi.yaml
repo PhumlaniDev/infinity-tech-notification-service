@@ -1,0 +1,294 @@
+openapi: 3.1.0
+info:
+  title: Notification Service API
+  description: |
+    API endpoints for triggering various asynchronous notifications (mainly email-based)
+    in an e-commerce / user management system.
+    
+    These endpoints are typically called:
+    - by other internal microservices (order-service, auth-service, payment-service)
+    - after important domain events (order placed, payment succeeded, user registered, etc.)
+    
+    All endpoints expect internal authentication (API key, mutual TLS, JWT with service role, etc.).
+    They are **not** intended for direct public/client usage.
+  version: 1.0.0
+  contact:
+    name: Infinity Tech Support
+    email: infinitytech@support.co.za
+  license:
+    name: Proprietary License - All rights reserved.
+    url: https://infinitytech.co.za/terms
+
+servers:
+  - url: https://api.infinitytech.com/v1
+    description: Production server
+  - url: https://staging-api.infinitytech.com/v1
+    description: Staging server
+
+tags:
+  - name: Notifications
+    description: Endpoints to trigger email / push / SMS notifications for business events
+
+paths:
+  /api/v1/notifications/email:
+    post:
+      tags:
+        - Notifications
+      summary: Send generic order-related notification
+      description: |
+        Sends an email notification related to an order (e.g. order confirmation,
+        order shipped, order cancelled, etc.).
+      operationId: sendOrderNotification
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderNotificationDto'
+      responses:
+        '200':
+          description: Notification accepted for processing
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Rate limit exceeded (too many notifications)
+  
+  /api/v1/notifications/payment-confirmation:
+    post:
+      tags:
+        - Notifications
+      summary: Send payment confirmation notification
+      description: |
+        Sends payment success / completed email to the customer.
+        Usually triggered after successful payment gateway callback / webhook.
+      operationId: sendPaymentConfirmation
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCompletedEvent'
+      responses:
+        '200':
+          description: Payment confirmation notification queued
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /api/v1/notifications/password-reset:
+    post:
+      tags:
+        - Notifications
+      summary: Send password reset email
+      description: |
+        Triggers sending of a password reset link / token to the user.
+      operationId: sendPasswordResetNotification
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetDto'
+      responses:
+        '200':
+          description: Reset password email queued
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /api/v1/notifications/email-verification:
+    post:
+      tags:
+        - Notifications
+      summary: Send email verification message
+      description: |
+        Sends verification link / code to confirm user's email address.
+        Typically called after registration or email change.
+      operationId: sendEmailVerificationNotification
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailVerificationRequestDto'
+      responses:
+        '200':
+          description: Verification email queued
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    
+    OrderNotificationDto:
+      type: object
+      required:
+        - orderId
+        - userId
+        - email
+        - type
+      properties:
+        orderId:
+          type: string
+          example: ORD-20260304-98765
+        userId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: customer@example.com
+        type:
+          type: string
+          enum: [ORDER_CONFIRMATION, ORDER_SHIPPED, ORDER_DELIVERED, ORDER_CANCELLED]
+          example: ORDER_CONFIRMATION
+        orderDate:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              quantity: { type: integer }
+              price: { type: number }
+    
+    PaymentCompletedEvent:
+      type: object
+      required:
+        - orderId
+        - paymentId
+        - amount
+        - currency
+        - email
+      properties:
+        orderId:
+          type: string
+          example: ORD-20260304-98765
+        paymentId:
+          type: string
+          example: PAY- stripe-3M21983712983
+        amount:
+          type: number
+          example: 1499.95
+        currency:
+          type: string
+          example: ZAR
+        paymentMethod:
+          type: string
+          example: CARD
+        email:
+          type: string
+          format: email
+        transactionTime:
+          type: string
+          format: date-time
+    
+    PasswordResetDto:
+      type: object
+      required:
+        - userId
+        - email
+        - resetToken
+        - resetUrl
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        resetToken:
+          type: string
+        resetUrl:
+          type: string
+          format: uri
+          example: https://yourdomain.com/reset-password?token=abc123...
+        expiresAt:
+          type: string
+          format: date-time
+    
+    EmailVerificationRequestDto:
+      type: object
+      required:
+        - userId
+        - email
+        - verificationToken
+        - verificationUrl
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        verificationToken:
+          type: string
+        verificationUrl:
+          type: string
+          format: uri
+          example: https://yourdomain.com/verify-email?token=xyz789...
+        expiresAt:
+          type: string
+          format: date-time
+    
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+        detail:
+          type: string
+          nullable: true
+  
+  responses:
+    BadRequest:
+      description: Invalid request payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key

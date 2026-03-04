@@ -151,6 +151,12 @@
 			<artifactId>itextpdf</artifactId>
 			<version>5.5.13.4</version>
 		</dependency>
+		<!--	Documentation	-->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.0.1</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
