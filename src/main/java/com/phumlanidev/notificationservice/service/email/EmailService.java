@@ -38,12 +38,11 @@ public class EmailService {
   @Value("${keycloak.realm}")
   private String keycloakRealm;
 
-  @Value("${keycloak.admin.username}")
-  private String keycloakAdminUsername;
+  @Value("${keycloak.resource}")
+  private String keycloakClientId;
 
-  @Value("${keycloak.admin.password}")
-  private String keycloakAdminPassword;
-
+  @Value("${keycloak.credentials.secret}")
+  private String keycloakClientSecret;
 
   public void sendOrderConfirmationEmail(String to, Long orderId, BigDecimal totalAmount, List<OrderPlacedEvent.OrderItemDto> items) {
     Context context = new Context();
@@ -158,11 +157,10 @@ public class EmailService {
   private Keycloak createAdminClient() {
     return KeycloakBuilder.builder()
             .serverUrl(keycloakAuthServerUrl)
-            .realm("master")
-            .clientId("admin-cli")
-            .username(keycloakAdminUsername)
-            .password(keycloakAdminPassword)
-            .grantType(OAuth2Constants.PASSWORD)
+            .realm(keycloakRealm)
+            .clientId(keycloakClientId)
+            .clientSecret(keycloakClientSecret)
+            .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
             .build();
   }
 
