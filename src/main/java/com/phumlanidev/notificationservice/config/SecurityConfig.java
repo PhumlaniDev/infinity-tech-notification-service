@@ -1,12 +1,13 @@
 package com.phumlanidev.notificationservice.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -14,26 +15,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  @Value("${spring.security.oauth2.resourceserver.jwt.jwk-uri}")
-  private String jwkUri;
-
-  private final JwtAuthenticationConverter jwtAuthenticationConverter;
-
-  /**
-   * Comment: this is the placeholder for documentation.
-   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/actuator/**").permitAll()
-                    .requestMatchers("/api/v1/notifications/**")
-                    .hasAnyRole("notification-service-role", "admin", "user")
-                    .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(
-                    jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
-
+                    .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
+                    .requestMatchers("/api/v1/notifications/email-verification", "/api/v1/notifications/password-reset").permitAll()
+                    .anyRequest().denyAll())
+            .oauth2ResourceServer(
+                    oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+            .sessionManagement(
+                    s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     return http.build();
   }
 }
